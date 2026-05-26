@@ -1,0 +1,155 @@
+-- 1. Criação das Tabelas Independentes (Sem Chaves Estrangeiras)
+
+CREATE TABLE Categoria (
+    ID_Categoria NUMBER PRIMARY KEY,
+    Nome VARCHAR2(50),
+    Descricao VARCHAR2(255)
+);
+
+CREATE TABLE Fornecedor (
+    ID_Fornecedor NUMBER PRIMARY KEY,
+    Razao_Social VARCHAR2(100),
+    CNPJ VARCHAR2(14),
+    Email_Contato VARCHAR2(100),
+    Telefone_Contato VARCHAR2(15)
+);
+
+CREATE TABLE Cliente (
+    ID_Cliente NUMBER PRIMARY KEY,
+    Nome VARCHAR2(100),
+    Cpf VARCHAR2(11),
+    Email VARCHAR2(100),
+    Telefone VARCHAR2(15),
+    Data_Nascimento DATE,
+    Endereco_Entrega VARCHAR2(255)
+);
+
+CREATE TABLE Item_Pedido (
+    ID_Item NUMBER PRIMARY KEY,
+    Quantidade NUMBER,
+    Preco_Unitario NUMBER(10,2)
+);
+
+-- 2. Criação das Tabelas Dependentes (Com Chaves Estrangeiras)
+
+CREATE TABLE Produto (
+    ID_Produto NUMBER PRIMARY KEY,
+    Nome VARCHAR2(100),
+    Descricao CLOB,
+    Sabor VARCHAR2(30),
+    Peso_Volume VARCHAR2(20),
+    Preco_Venda NUMBER(10,2),
+    Quantidade_Estoque NUMBER,
+    fk_Categoria_ID_Categoria NUMBER,
+    fk_Fornecedor_ID_Fornecedor NUMBER,
+    
+    CONSTRAINT fk_Prod_Categoria FOREIGN KEY (fk_Categoria_ID_Categoria) 
+        REFERENCES Categoria (ID_Categoria),
+    CONSTRAINT fk_Prod_Fornecedor FOREIGN KEY (fk_Fornecedor_ID_Fornecedor) 
+        REFERENCES Fornecedor (ID_Fornecedor)
+);
+
+CREATE TABLE Pedido (
+    ID_Pedido NUMBER PRIMARY KEY,
+    Data_Hora TIMESTAMP,
+    Valor_Total NUMBER(10,2),
+    Status VARCHAR2(20),
+    Metodo_Pagamento VARCHAR2(30),
+    fk_Cliente_ID_Cliente NUMBER,
+    
+    CONSTRAINT fk_Ped_Cliente FOREIGN KEY (fk_Cliente_ID_Cliente) 
+        REFERENCES Cliente (ID_Cliente)
+);
+
+-- 3. Criação da Tabela Associativa (Relacionamento N:M)
+
+CREATE TABLE Contem (
+    fk_Item_Pedido_ID_Item NUMBER,
+    fk_Produto_ID_Produto NUMBER,
+    fk_Pedido_ID_Pedido NUMBER,
+    
+    -- Chave Primária Composta
+    PRIMARY KEY (fk_Item_Pedido_ID_Item, fk_Produto_ID_Produto, fk_Pedido_ID_Pedido),
+    
+    -- Chaves Estrangeiras
+    CONSTRAINT fk_Contem_Item FOREIGN KEY (fk_Item_Pedido_ID_Item) 
+        REFERENCES Item_Pedido (ID_Item),
+    CONSTRAINT fk_Contem_Produto FOREIGN KEY (fk_Produto_ID_Produto) 
+        REFERENCES Produto (ID_Produto),
+    CONSTRAINT fk_Contem_Pedido FOREIGN KEY (fk_Pedido_ID_Pedido) 
+        REFERENCES Pedido (ID_Pedido)
+);
+
+
+-- ==========================================
+-- 1. Inserindo as Categorias
+-- ==========================================
+INSERT INTO Categoria (ID_Categoria, Nome, Descricao) 
+VALUES (1, 'Proteínas', 'Suplementos proteicos para ganho e recuperação muscular');
+
+INSERT INTO Categoria (ID_Categoria, Nome, Descricao) 
+VALUES (2, 'Creatina', 'Suplementos de creatina para ganho de força e explosão');
+
+INSERT INTO Categoria (ID_Categoria, Nome, Descricao) 
+VALUES (3, 'Pré treino', 'Suplementos para aumento de energia e foco nos treinos');
+
+
+-- ==========================================
+-- 2. Inserindo os Fornecedores 
+-- ==========================================
+INSERT INTO Fornecedor (ID_Fornecedor, Razao_Social, CNPJ, Email_Contato, Telefone_Contato) 
+VALUES (1, 'Suplementos Brasil Distribuidora', '12345678000199', 'vendas@suplebrasil.com', '11999998888');
+
+
+-- ==========================================
+-- 3. Inserindo os Produtos
+-- ==========================================
+
+-- Categoria: Proteínas (ID 1)
+-- Whey protein isolado - Morango (900g, R$149,90)
+INSERT INTO Produto (ID_Produto, Nome, Descricao, Sabor, Peso_Volume, Preco_Venda, Quantidade_Estoque, fk_Categoria_ID_Categoria, fk_Fornecedor_ID_Fornecedor) 
+VALUES (1, 'Whey Protein Isolado Morango', 'Suplemento proteico isolado de alta absorção', 'Morango', '900g', 149.90, 50, 1, 1);
+
+-- Whey protein isolado - Chocolate (900g, R$149,90)
+INSERT INTO Produto (ID_Produto, Nome, Descricao, Sabor, Peso_Volume, Preco_Venda, Quantidade_Estoque, fk_Categoria_ID_Categoria, fk_Fornecedor_ID_Fornecedor) 
+VALUES (2, 'Whey Protein Isolado Chocolate', 'Suplemento proteico isolado de alta absorção', 'Chocolate', '900g', 149.90, 50, 1, 1);
+
+
+-- Categoria: Creatina (ID 2)
+-- Creatina Monohidratada (300g, R$89,90)
+INSERT INTO Produto (ID_Produto, Nome, Descricao, Sabor, Peso_Volume, Preco_Venda, Quantidade_Estoque, fk_Categoria_ID_Categoria, fk_Fornecedor_ID_Fornecedor) 
+VALUES (3, 'Creatina Monohidratada', 'Creatina monohidratada pura em pó', 'Sem Sabor', '300g', 89.90, 100, 2, 1);
+
+-- Creatina Pure (300g, R$99,90)
+INSERT INTO Produto (ID_Produto, Nome, Descricao, Sabor, Peso_Volume, Preco_Venda, Quantidade_Estoque, fk_Categoria_ID_Categoria, fk_Fornecedor_ID_Fornecedor) 
+VALUES (4, 'Creatina Pure', 'Creatina com alto grau de pureza e refino', 'Sem Sabor', '300g', 99.90, 80, 2, 1);
+
+
+-- Categoria: Pré treino (ID 3)
+-- Pré treino - Laranja (300g, R$79,90)
+INSERT INTO Produto (ID_Produto, Nome, Descricao, Sabor, Peso_Volume, Preco_Venda, Quantidade_Estoque, fk_Categoria_ID_Categoria, fk_Fornecedor_ID_Fornecedor) 
+VALUES (5, 'Pré Treino Energy Laranja', 'Suplemento pré-treino para foco e resistência', 'Laranja', '300g', 79.90, 40, 3, 1);
+
+-- Pré treino - Uva (300g, R$79,90)
+INSERT INTO Produto (ID_Produto, Nome, Descricao, Sabor, Peso_Volume, Preco_Venda, Quantidade_Estoque, fk_Categoria_ID_Categoria, fk_Fornecedor_ID_Fornecedor) 
+VALUES (6, 'Pré Treino Energy Uva', 'Suplemento pré-treino para foco e resistência', 'Uva', '300g', 79.90, 40, 3, 1);
+
+
+-- ==========================================
+-- 4. Inserindo Clientes, Pedidos e Itens
+-- ==========================================
+INSERT INTO Cliente (ID_Cliente, Nome, Cpf, Email, Telefone, Data_Nascimento, Endereco_Entrega) 
+VALUES (1, 'Carlos Souza', '22233344455', 'carlos@email.com', '11955554444', TO_DATE('1995-02-10', 'YYYY-MM-DD'), 'Av. Central, 500');
+
+
+INSERT INTO Item_Pedido (ID_Item, Quantidade, Preco_Unitario) VALUES (1, 1, 149.90);
+INSERT INTO Item_Pedido (ID_Item, Quantidade, Preco_Unitario) VALUES (2, 1, 99.90);
+
+INSERT INTO Pedido (ID_Pedido, Data_Hora, Valor_Total, Status, Metodo_Pagamento, fk_Cliente_ID_Cliente) 
+VALUES (1, TO_TIMESTAMP('2026-05-25 10:00:00', 'YYYY-MM-DD HH24:MI:SS'), 249.80, 'Concluído', 'PIX', 1);
+
+INSERT INTO Contem (fk_Item_Pedido_ID_Item, fk_Produto_ID_Produto, fk_Pedido_ID_Pedido) VALUES (1, 2, 1);
+INSERT INTO Contem (fk_Item_Pedido_ID_Item, fk_Produto_ID_Produto, fk_Pedido_ID_Pedido) VALUES (2, 4, 1);
+
+
+COMMIT;
